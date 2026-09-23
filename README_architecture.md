@@ -1,3 +1,14 @@
-"""Observability package for JARVIS runtime logging and traces."""
+"""Event stubs for runtime lifecycle notices."""
 
-__all__ = ["logging", "traces", "metrics"]
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass
+class RuntimeEvent:
+    kind: str
+    message: str
+
+
+__all__ = ["RuntimeEvent"]
