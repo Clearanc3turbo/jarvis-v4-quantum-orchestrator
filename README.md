@@ -1,4 +1,4 @@
-# JARVIS v4 — Quantum-Classical AI Orchestrator
+# JARVIS v5* — Quantum-Classical AI Orchestrator
 
 A fully integrated, NISQ-friendly quantum-classical AI orchestration system.
 
