@@ -6,11 +6,11 @@ A fully integrated, NISQ-friendly quantum-classical AI orchestration system.
 
 | File | Purpose |
 |---|---|
-| `jarvis_v4.py` | Core orchestrator — Tavily search, embedding memory, DAG re-planner, PAT v2 |
+| `jarvis_v5.py` | Core orchestrator — Tavily search, embedding memory, DAG re-planner, PAT v2 |
 | `jarvis_vqc_layer.py` | PennyLane VQC Query projection (parameter-shift gradients) |
 | `jarvis_aletheia.py` | Aletheia fact-checker — claim decomposition + 3D EQ scoring |
 | `jarvis_qnlp.py` | QNLP compiler — CCG to string diagrams to IQP/MPS circuits to QASM |
-| `jarvis_v4_integrated.py` | All modules wired into one unified DAG |
+| `jarvis_v5_integrated.py` | All modules wired into one unified DAG |
 | `jarvis_launch.py` | One-command launcher with CLI + interactive REPL |
 
 ## Quick Start
