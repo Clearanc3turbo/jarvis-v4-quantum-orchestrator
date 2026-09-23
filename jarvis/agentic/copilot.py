@@ -1,78 +1,44 @@
-"""Agentic Wingman orchestration layer."""
-
+"""Reviewable Copilot patch proposals with workspace-bound writes."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Mapping
-
-from jarvis.agentic.policy import ActionPolicy
-from jarvis.execution.plan import ExecutionPlan, PlannedAction
-from jarvis.security.guardrails import PromptGuardrail
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 
-@dataclass
-class WingmanAgent:
-    """Coordinates planning, guardrails, policy enforcement, and execution audit."""
+@dataclass(frozen=True)
+class PatchProposal:
+    file_path: str
+    before: str
+    after: str
+    summary: str
 
-    guardrail: PromptGuardrail = field(default_factory=PromptGuardrail)
-    policy: ActionPolicy = field(default_factory=ActionPolicy)
+    def to_dict(self) -> dict[str, Any]:
+        return {"file_path": self.file_path, "before": self.before, "after": self.after, "summary": self.summary}
 
-    def plan(self, goal: str, domain: str = "agentic") -> ExecutionPlan:
-        normalized = goal.strip()
-        if not normalized:
-            raise ValueError("goal is required")
 
-        actions: list[PlannedAction] = [
-            PlannedAction(
-                name="read_context",
-                tool="memory_lookup",
-                arguments={"query": normalized},
-                risk="low",
-                requires_approval=False,
-            ),
-            PlannedAction(
-                name="verify_constraints",
-                tool="guardrail_check",
-                arguments={"prompt": normalized},
-                risk="low",
-                requires_approval=False,
-            ),
-            PlannedAction(
-                name="produce_response",
-                tool="synthesize",
-                arguments={"goal": normalized, "domain": domain},
-                risk="medium",
-                requires_approval=False,
-            ),
-        ]
-        return ExecutionPlan(goal=normalized, domain=domain, actions=tuple(actions), rationale="Safe agentic planning flow")
+class CopilotAgent:
+    def suggest_patch(self, file_path: str, original: str, replacement: str, summary: str) -> PatchProposal:
+        if not file_path or not isinstance(original, str) or not isinstance(replacement, str):
+            raise ValueError("invalid patch input")
+        return PatchProposal(file_path, original, replacement, summary)
 
-    def execute(self, goal: str, *, require_approval: bool = False, domain: str = "agentic") -> dict[str, Any]:
-        allowed, issues = self.guardrail.screen(goal)
-        if not allowed:
-            return {
-                "approved": False,
-                "status": "blocked",
-                "goal": goal,
-                "issues": issues,
-                "plan": None,
-            }
+    def validate_patch(self, proposal: PatchProposal, workspace: str | Path) -> Path:
+        root = Path(workspace).resolve()
+        target = (root / proposal.file_path).resolve()
+        if target != root and root not in target.parents:
+            raise ValueError("patch path escapes workspace")
+        if target.exists() and target.read_text(encoding="utf-8") != proposal.before:
+            raise ValueError("patch base does not match current file")
+        return target
 
-        plan = self.plan(goal, domain=domain)
-        audit = []
-        for action in plan.actions:
-            policy_result = self.policy.evaluate(action)
-            if policy_result.requires_approval and (require_approval or policy_result.risk == "high"):
-                audit.append({"action": action.name, "status": "awaiting_approval", "risk": policy_result.risk})
-                continue
-            audit.append({"action": action.name, "status": "allowed", "risk": policy_result.risk})
+    def apply_patch(self, proposal: PatchProposal, *, workspace: str | Path = ".", write: bool = False) -> str:
+        target = self.validate_patch(proposal, workspace)
+        if not write:
+            return proposal.after
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(proposal.after, encoding="utf-8")
+        return str(target)
 
-        approved = all(item["status"] != "awaiting_approval" for item in audit)
-        return {
-            "approved": approved,
-            "status": "ok" if approved else "pending_approval",
-            "goal": goal,
-            "issues": [],
-            "plan": [action.to_dict() for action in plan.actions],
-            "audit": audit,
-        }
+    def summarize_edit(self, file_path: str, change: str) -> str:
+        return f"Updated {file_path} with a focused change: {change[:80]}"

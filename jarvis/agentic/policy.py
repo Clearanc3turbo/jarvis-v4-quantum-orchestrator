@@ -1,51 +1,45 @@
-"""Copilot-style code assistance layer."""
-
+"""Policy decisions and explicit approval state transitions."""
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
+from enum import Enum
 from typing import Any, Mapping
 
 
-@dataclass
-class PatchProposal:
-    file_path: str
-    before: str
-    after: str
-    summary: str
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "file_path": self.file_path,
-            "before": self.before,
-            "after": self.after,
-            "summary": self.summary,
-        }
+class RiskLevel(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
 
 
-class CopilotAgent:
-    """Creates reviewable patch proposals without silently executing repo changes."""
+class ApprovalState(str, Enum):
+    ALLOWED = "allowed"
+    PENDING = "pending_approval"
+    APPROVED = "approved"
+    DENIED = "denied"
 
-    def suggest_patch(self, file_path: str, original: str, replacement: str, summary: str) -> PatchProposal:
-        if not file_path or not isinstance(original, str) or not isinstance(replacement, str):
-            raise ValueError("invalid patch input")
-        return PatchProposal(
-            file_path=file_path,
-            before=original,
-            after=replacement,
-            summary=summary,
-        )
 
-    def apply_patch(self, proposal: PatchProposal, *, write: bool = False) -> str:
-        if not isinstance(proposal, PatchProposal):
-            raise ValueError("proposal must be a PatchProposal")
-        if not write:
-            return proposal.after
+@dataclass(frozen=True)
+class PolicyDecision:
+    risk: str
+    state: ApprovalState
 
-        target = Path(proposal.file_path)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(proposal.after, encoding="utf-8")
-        return str(target)
 
-    def summarize_edit(self, file_path: str, change: str) -> str:
-        return f"Updated {file_path} with a focused change: {change[:80]}"
+class ActionPolicy:
+    def evaluate(self, action: Mapping[str, Any]) -> PolicyDecision:
+        tool = str(action.get("tool", "")).casefold()
+        name = str(action.get("name", "")).casefold()
+        if tool in {"shell", "subprocess", "bash", "cmd", "powershell", "delete_file"} or name in {"read_secret", "write_secret"}:
+            return PolicyDecision(RiskLevel.HIGH.value, ApprovalState.PENDING)
+        if tool in {"network", "http", "api_call", "write_file", "rename_file", "synthesize"}:
+            return PolicyDecision(RiskLevel.MEDIUM.value, ApprovalState.PENDING)
+        return PolicyDecision(RiskLevel.LOW.value, ApprovalState.ALLOWED)
+
+    def approve(self, action: Mapping[str, Any]) -> ApprovalState:
+        decision = self.evaluate(action)
+        if decision.state == ApprovalState.PENDING:
+            return ApprovalState.APPROVED
+        return decision.state
+
+    def deny(self, action: Mapping[str, Any]) -> ApprovalState:
+        return ApprovalState.DENIED
