@@ -1,18 +1,26 @@
-"""Aletheia verification stub for JARVIS."""
+"""Tool registry for JARVIS."""
 
 from __future__ import annotations
 
-from jarvis.modules.base import BaseModule
+from typing import Any, Callable, Dict, Optional
 
 
-class AletheiaModule(BaseModule):
-    name = "aletheia"
+class ToolRegistry:
+    """Registry for managing tools and their metadata."""
 
-    def initialize(self) -> None:
-        self.ready = True
+    def __init__(self):
+        self._tools: Dict[str, Dict[str, Any]] = {}
 
-    def run(self, task, context=None):
-        return {"module": self.name, "status": "ok", "task": getattr(task, "query", str(task))}
+    def register(self, name: str, func: Callable, description: str = "") -> None:
+        """Register a tool."""
+        self._tools[name] = {"func": func, "description": description}
 
-    def register_tools(self, registry) -> None:
-        registry.register("aletheia_verify", self.run)
+    def execute(self, name: str, **kwargs: Any) -> Any:
+        """Execute a registered tool."""
+        if name not in self._tools:
+            raise ValueError(f"tool not found: {name}")
+        return self._tools[name]["func"](**kwargs)
+
+    def list(self) -> Dict[str, str]:
+        """List all registered tools."""
+        return {name: info.get("description", "") for name, info in self._tools.items()}

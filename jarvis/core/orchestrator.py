@@ -5,11 +5,11 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from jarvis.config.settings import Settings
+from jarvis.config.loader import ModuleLoader
 from jarvis.core.task import Task
 from jarvis.core.workflow import Workflow, WorkflowNode
 from jarvis.memory.vector_store import VectorMemoryStore
-from jarvis.modules.loader import ModuleLoader
-from jarvis.tools.registry import ToolRegistry
+from jarvis.tools import ToolRegistry
 
 
 class JARVISOrchestrator:
