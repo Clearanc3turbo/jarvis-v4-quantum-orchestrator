@@ -1,4 +1,9 @@
-"""Runtime orchestration for JARVIS."""
+"""Runtime orchestration for JARVIS.
+
+Central coordination engine that orchestrates planning, tool execution,
+specialist module integration, memory management, and result synthesis.
+Provides a unified interface for the entire quantum-classical runtime.
+"""
 
 from __future__ import annotations
 
@@ -13,9 +18,13 @@ from jarvis.tools import ToolRegistry
 
 
 class JARVISOrchestrator:
-    """Coordinates planning, tools, specialist modules, memory, and synthesis."""
+    """Coordinates planning, tools, specialist modules, memory, and synthesis.
+    
+    Central hub that manages workflow execution, module loading, tool
+    registration, and memory persistence across all orchestration phases.
+    """
 
-    def __init__(self, settings: Optional[Settings] = None):
+    def __init__(self, settings: Optional[Settings] = None) -> None:
         self.settings = settings or Settings()
         self.memory = VectorMemoryStore()
         self.tools = ToolRegistry()
@@ -26,6 +35,7 @@ class JARVISOrchestrator:
         self.loader.register_tools(self.tools)
 
     def _register_default_tools(self) -> None:
+        """Register default tools for search and memory lookup."""
         self.tools.register("search", self._search_tool, description="Search configured backend")
         self.tools.register("memory_lookup", self._memory_tool, description="Retrieve related memory")
 
@@ -36,6 +46,14 @@ class JARVISOrchestrator:
         return self.memory.search(query, top_k=self.settings.memory_top_k)
 
     def build_workflow(self, task: Task) -> Workflow:
+        """Construct execution workflow from task specification.
+        
+        Args:
+            task: Task object containing query and domain information.
+            
+        Returns:
+            Complete workflow with all nodes and dependencies configured.
+        """
         workflow = Workflow(name=f"workflow-{task.id}")
         workflow.add_node(WorkflowNode("search", "search", {"query": task.query}))
         workflow.add_node(WorkflowNode("memory_lookup", "memory_lookup", {"query": task.query}, ["search"]))
@@ -55,6 +73,15 @@ class JARVISOrchestrator:
         return workflow
 
     def run(self, query: str, domain: Optional[str] = None) -> str:
+        """Execute orchestration workflow for given query.
+        
+        Args:
+            query: Natural language query to process.
+            domain: Optional domain specification; uses settings default if not provided.
+            
+        Returns:
+            Synthesized answer combining all module outputs and search results.
+        """
         task = Task(query=query, domain=domain or self.settings.domain)
         workflow = self.build_workflow(task)
         results: Dict[str, Any] = {}
@@ -82,6 +109,11 @@ class JARVISOrchestrator:
         )
 
     def status(self) -> Dict[str, Any]:
+        """Get comprehensive orchestrator status report.
+        
+        Returns:
+            Dictionary with settings, module states, tool registry, and workflow count.
+        """
         return {
             "settings": self.settings.as_dict(),
             "modules": self.loader.status(),

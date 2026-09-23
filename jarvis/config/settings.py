@@ -1,10 +1,15 @@
-"""Runtime configuration for JARVIS."""
+"""Runtime configuration for JARVIS.
+
+Type-annotated configuration management for all JARVIS runtime settings.
+Supports environment-based configuration and provides a clean interface
+for accessing runtime parameters across all orchestration components.
+"""
 
 from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -19,7 +24,7 @@ class Settings:
     extra: Dict[str, str] = field(default_factory=dict)
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         modules = os.getenv("JARVIS_MODULES", "vqc,aletheia,qnlp")
         return cls(
             domain=os.getenv("JARVIS_DOMAIN", "quantum_architect"),
@@ -29,7 +34,7 @@ class Settings:
             enabled_modules=[item.strip() for item in modules.split(",") if item.strip()],
         )
 
-    def as_dict(self) -> Dict[str, object]:
+    def as_dict(self) -> Dict[str, Any]:
         return {
             "app_name": self.app_name,
             "domain": self.domain,

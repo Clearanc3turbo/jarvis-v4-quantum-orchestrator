@@ -24,3 +24,7 @@ class ToolRegistry:
     def list(self) -> Dict[str, str]:
         """List all registered tools."""
         return {name: info.get("description", "") for name, info in self._tools.items()}
+    
+    def list_tools(self) -> Dict[str, str]:
+        """Alias for list() for consistency."""
+        return self.list()
