@@ -1,4 +1,4 @@
-"""VQC module package."""
+"""VQC module exports."""
 
 from .module import VQCModule
 

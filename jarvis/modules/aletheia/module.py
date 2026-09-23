@@ -1,4 +1,4 @@
-"""Aletheia module package."""
+"""Aletheia module exports."""
 
 from .module import AletheiaModule
 

@@ -1,4 +1,4 @@
-"""Tool registry and execution layer for JARVIS."""
+"""Tool registry package exports for JARVIS."""
 
 from .registry import ToolRegistry
 

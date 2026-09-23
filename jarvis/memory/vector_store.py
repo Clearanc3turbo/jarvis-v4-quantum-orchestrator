@@ -1,4 +1,4 @@
-"""Memory storage abstractions for JARVIS."""
+"""Memory package exports for JARVIS."""
 
 from .vector_store import VectorMemoryStore
 

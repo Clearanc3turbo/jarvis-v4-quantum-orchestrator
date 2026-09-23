@@ -1,4 +1,4 @@
-"""Base module interface for JARVIS specialist capabilities."""
+"""Shared base class for JARVIS modules."""
 
 from __future__ import annotations
 
@@ -6,18 +6,18 @@ from typing import Any, Dict, Optional
 
 
 class BaseModule:
-    """Shared contract used by all specialist modules."""
+    """Common interface for specialist modules."""
 
     name: str = "base"
 
     def initialize(self) -> None:
-        """Perform necessary setup."""
+        """Perform any required setup."""
 
     def health_check(self) -> bool:
         return True
 
     def run(self, task: Any, context: Optional[Dict[str, Any]] = None) -> Any:
-        raise NotImplementedError("Module run() must be implemented by subclass.")
+        raise NotImplementedError("Subclasses must implement run().")
 
     def register_tools(self, registry: Any) -> None:
-        """Register this module's tools with a runtime registry."""
+        """Register module-specific runtime tools."""

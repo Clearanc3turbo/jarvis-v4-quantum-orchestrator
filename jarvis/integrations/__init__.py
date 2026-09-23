@@ -1,27 +1,34 @@
-"""CLI interface for the JARVIS runtime."""
+"""In-memory vector retrieval store for JARVIS."""
 
 from __future__ import annotations
 
-import argparse
-
-from jarvis.app.launcher import JARVISLauncher
+from typing import Any, Dict, List, Optional
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="JARVIS orchestration CLI")
-    parser.add_argument("--query", type=str, default="Explain the hybrid quantum orchestration flow.")
-    parser.add_argument("--domain", type=str, default="quantum_architect")
-    return parser
+class VectorMemoryStore:
+    """Minimal retrieval store."""
 
+    def __init__(self):
+        self.documents: List[Dict[str, Any]] = []
 
-def main(argv: list[str] | None = None) -> None:
-    parser = build_parser()
-    args = parser.parse_args(argv)
+    def add(self, doc_id: str, content: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+        self.documents.append({
+            "id": doc_id,
+            "content": content,
+            "metadata": metadata or {},
+        })
 
-    launcher = JARVISLauncher()
-    launcher.settings.domain = args.domain
-    print(launcher.run(args.query))
+    def search(self, query: str, top_k: int = 3) -> List[Dict[str, Any]]:
+        if not self.documents:
+            return []
 
+        q = query.lower()
+        matches: List[Dict[str, Any]] = []
+        for item in self.documents:
+            content = str(item["content"]).lower()
+            score = sum(1 for token in q.split() if token in content)
+            if score > 0:
+                matches.append({"id": item["id"], "score": score, "content": item["content"]})
 
-if __name__ == "__main__":
-    main()
+        matches.sort(key=lambda x: x["score"], reverse=True)
+        return matches[:top_k]

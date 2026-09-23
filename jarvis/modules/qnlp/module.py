@@ -1,4 +1,4 @@
-"""QNLP module package."""
+"""QNLP module exports."""
 
 from .module import QNLPModule
 
