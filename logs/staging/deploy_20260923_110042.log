@@ -1,0 +1,70 @@
+[2026-09-23 11:00:42] Starting JARVIS V8 staging deployment...
+[2026-09-23 11:00:42] Phase 1: Validating environment...
+[2026-09-23 11:00:42] ✅ Python found: Python 3.14.2
+[2026-09-23 11:00:42] ✅ pip found
+[2026-09-23 11:00:42] Phase 2: Installing dependencies...
+[2026-09-23 11:00:47] ✅ Dependencies installed
+[2026-09-23 11:00:47] Phase 3: Running integration tests...
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/codespace/.python/current/bin/python
+cachedir: .pytest_cache
+rootdir: /workspaces/jarvis-v5-quantum-orchestrator
+configfile: pyproject.toml
+plugins: anyio-4.15.1, cov-7.1.0
+collecting ... collected 18 items
+
+tests/test_integration_staging.py::TestIntegrationCore::test_orchestrator_initialization PASSED [  5%]
+tests/test_integration_staging.py::TestIntegrationCore::test_query_execution PASSED [ 11%]
+tests/test_integration_staging.py::TestIntegrationCore::test_workflow_construction PASSED [ 16%]
+tests/test_integration_staging.py::TestIntegrationCore::test_memory_persistence PASSED [ 22%]
+tests/test_integration_staging.py::TestIntegrationCore::test_tool_registry PASSED [ 27%]
+tests/test_integration_staging.py::TestObservability::test_structured_logging PASSED [ 33%]
+tests/test_integration_staging.py::TestObservability::test_metrics_collection PASSED [ 38%]
+tests/test_integration_staging.py::TestObservability::test_performance_tracking PASSED [ 44%]
+tests/test_integration_staging.py::TestObservability::test_event_tracking PASSED [ 50%]
+tests/test_integration_staging.py::TestPerformanceBenchmarking::test_query_throughput PASSED [ 55%]
+tests/test_integration_staging.py::TestPerformanceBenchmarking::test_memory_search_performance PASSED [ 61%]
+tests/test_integration_staging.py::TestBackendIntegration::test_settings_from_environment PASSED [ 66%]
+tests/test_integration_staging.py::TestBackendIntegration::test_module_loading PASSED [ 72%]
+tests/test_integration_staging.py::TestBackendIntegration::test_orchestrator_status_reporting PASSED [ 77%]
+tests/test_integration_staging.py::TestErrorHandlingAndRecovery::test_invalid_query_handling PASSED [ 83%]
+tests/test_integration_staging.py::TestErrorHandlingAndRecovery::test_memory_search_with_empty_store PASSED [ 88%]
+tests/test_integration_staging.py::TestErrorHandlingAndRecovery::test_metrics_with_failed_operations PASSED [ 94%]
+tests/test_integration_staging.py::TestEndToEndWorkflow::test_complete_query_lifecycle PASSED [100%]
+
+============================== 18 passed in 0.11s ==============================
+[2026-09-23 11:00:47] ✅ All integration tests passed
+[2026-09-23 11:00:48] Phase 4: Running type checks...
+jarvis/benchmarks/runner.py:3: error: Module "jarvis.benchmarks.runner" has no attribute "benchmark_agentic_runtime"  [attr-defined]
+jarvis/memory/vector_store.py:29: error: Item "None" of "Any | None" has no attribute "encode"  [union-attr]
+jarvis/benchmarks/__init__.py:86: error: "object" not callable  [operator]
+jarvis/app/launcher.py:29: error: Item "None" of "Any | None" has no attribute "encode"  [union-attr]
+jarvis/observability/events.py:89: error: Function "builtins.callable" is not valid as a type  [valid-type]
+jarvis/observability/events.py:89: note: Perhaps you meant "typing.Callable" instead of "callable"?
+jarvis/observability/events.py:99: error: callable? not callable  [misc]
+jarvis/observability/events.py:103: error: Function "builtins.callable" is not valid as a type  [valid-type]
+jarvis/observability/events.py:103: note: Perhaps you meant "typing.Callable" instead of "callable"?
+jarvis/app/__init__.py:3: error: Module "jarvis.app.launcher" has no attribute "JARVISLauncher"  [attr-defined]
+jarvis/__init__.py:11: error: Module "jarvis.app.launcher" has no attribute "JARVISLauncher"  [attr-defined]
+mypy.ini: note: unused section(s): [mypy-tests.*]
+Found 9 errors in 7 files (checked 47 source files)
+[2026-09-23 11:00:51] ✅ Type checking complete (warnings only)
+[2026-09-23 11:00:51] Phase 5: Collecting baseline metrics...
+Collecting baseline metrics...
+  Modules loaded: 3
+  Tools available: 2
+  Settings domain: quantum_architect
+✅ Baseline metrics collected
+[2026-09-23 11:00:51] Phase 6: Deployment summary
+[2026-09-23 11:00:51] ========================================
+[2026-09-23 11:00:51] ✅ Deployment successful!
+[2026-09-23 11:00:51] Environment: staging
+[2026-09-23 11:00:51] Timestamp: 20260923_110042
+[2026-09-23 11:00:51] Log file: logs/staging/deploy_20260923_110042.log
+[2026-09-23 11:00:51] 
+[2026-09-23 11:00:51] Next steps:
+[2026-09-23 11:00:51] 1. Access staging environment at: https://staging.jarvis.local
+[2026-09-23 11:00:51] 2. Monitor observability dashboard: https://staging-grafana.local
+[2026-09-23 11:00:51] 3. Review logs: logs/staging/deploy_20260923_110042.log
+[2026-09-23 11:00:51] 
+[2026-09-23 11:00:51] Deployment complete! 🎉

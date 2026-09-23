@@ -1,0 +1,26 @@
+groups:
+  - name: jarvis-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(jarvis_errors_total[5m]) > 0.01
+        for: 5m
+        annotations:
+          summary: "High error rate in JARVIS ({{ $value }})"
+      
+      - alert: LowSuccessRate
+        expr: rate(jarvis_operations_success[5m]) < 0.95
+        for: 5m
+        annotations:
+          summary: "Success rate below 95% ({{ $value }})"
+      
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, jarvis_operation_duration_seconds) > 0.5
+        for: 5m
+        annotations:
+          summary: "P95 latency above 500ms ({{ $value }}s)"
+      
+      - alert: LowThroughput
+        expr: rate(jarvis_operations_total[5m]) < 1
+        for: 10m
+        annotations:
+          summary: "Throughput below 1 op/s ({{ $value }})"
