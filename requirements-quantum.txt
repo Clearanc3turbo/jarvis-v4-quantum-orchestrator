@@ -1,0 +1,2 @@
+# Optional quantum SDKs (install only when needed):
+# pip install -e '.[qiskit]' or pip install -e '.[pytket]'

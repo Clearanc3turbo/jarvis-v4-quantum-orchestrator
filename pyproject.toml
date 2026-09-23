@@ -8,16 +8,15 @@ version = "5.0.0.dev0"
 description = "Quantum-classical AI orchestration runtime"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-  "numpy>=1.24.0",
-  "pennylane>=0.35.0",
-  "sentence-transformers>=2.2.0",
-  "torch>=2.0.0",
-]
+dependencies = ["numpy>=1.24.0"]
 
 [project.optional-dependencies]
-test = ["pytest>=7.0.0"]
-dev = ["build>=1.2.0", "pytest>=7.0.0"]
+embeddings = ["sentence-transformers>=2.2", "torch>=2.0"]
+quantum = ["pennylane>=0.35"]
+qiskit = ["qiskit>=1.0", "qiskit-ibm-runtime>=0.20"]
+pytket = ["pytket>=1.20"]
+test = ["pytest>=7.0", "pytest-cov>=4.1"]
+dev = ["build>=1.2.0", "pytest>=7.0", "pytest-cov>=4.1"]
 
 [project.scripts]
 jarvis = "jarvis_launch:main"
