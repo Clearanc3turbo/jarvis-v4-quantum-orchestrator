@@ -1,0 +1,6 @@
+# JARVIS QNLP Compiler - Dependencies
+# All are optional with graceful fallbacks in the module
+lambeq>=0.4.0
+pytket>=1.20.0
+pennylane>=0.33.0
+numpy>=1.24.0
