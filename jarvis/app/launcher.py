@@ -1,37 +1,53 @@
-"""Bootstrap and CLI entrypoint for the JARVIS runtime."""
+"""Retrieval memory with optional sentence-transformers embeddings."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional
-
-from jarvis.config.settings import Settings
-from jarvis.core.orchestrator import JARVISOrchestrator
+import math
+import time
+from typing import Any, Dict, List, Optional
 
 
-@dataclass
-class LaunchContext:
-    settings: Settings
-    orchestrator: Optional[JARVISOrchestrator] = None
+class VectorMemoryStore:
+    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+        self.documents: List[Dict[str, Any]] = []
+        self._model = None
+        self._embeddings: List[Any] = []
+        try:
+            from sentence_transformers import SentenceTransformer
+            self._model = SentenceTransformer(model_name)
+        except Exception:
+            self._model = None
 
+    def add_memory(self, doc_id: str, content: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+        document = {"id": doc_id, "content": content, "metadata": metadata or {}, "timestamp": time.time()}
+        self.documents.append(document)
+        self._embeddings.append(self._encode(content) if self._model else None)
 
-class JARVISLauncher:
-    """Minimal runtime bootstrapper for the refactored architecture."""
+    add = add_memory
 
-    def __init__(self, settings: Optional[Settings] = None):
-        self.settings = settings or Settings()
-        self.context = LaunchContext(settings=self.settings)
+    def _encode(self, text: str):
+        vector = self._model.encode(text, convert_to_numpy=True)
+        norm = float((vector ** 2).sum() ** 0.5)
+        return vector / norm if norm else vector
 
-    def bootstrap(self) -> JARVISOrchestrator:
-        orchestrator = JARVISOrchestrator(settings=self.settings)
-        self.context.orchestrator = orchestrator
-        return orchestrator
+    @staticmethod
+    def _lexical_score(query: str, content: str) -> float:
+        query_words = set(query.lower().split())
+        content_words = content.lower().split()
+        if not query_words or not content_words:
+            return 0.0
+        overlap = sum(1 for word in content_words if word in query_words)
+        return overlap / (math.sqrt(len(content_words)) * math.sqrt(len(query_words)) + 1e-9)
 
-    def run(self, query: str) -> str:
-        orchestrator = self.context.orchestrator or self.bootstrap()
-        return orchestrator.run(query)
-
-
-if __name__ == "__main__":
-    launcher = JARVISLauncher()
-    print(launcher.run("Explain the hybrid quantum orchestration flow."))
+    def search(self, query: str, top_k: int = 3) -> List[Dict[str, Any]]:
+        scored = []
+        query_vector = self._encode(query) if self._model else None
+        for document, embedding in zip(self.documents, self._embeddings):
+            if query_vector is not None and embedding is not None:
+                score = float(query_vector.dot(embedding))
+            else:
+                score = self._lexical_score(query, str(document["content"]))
+            if score > 0:
+                scored.append((score, document))
+        scored.sort(key=lambda item: item[0], reverse=True)
+        return [{**document, "score": score} for score, document in scored[:top_k]]

@@ -1,0 +1,22 @@
+from jarvis.app.launcher import JARVISLauncher
+from jarvis.config.settings import Settings
+from jarvis.core.workflow import Workflow, WorkflowNode
+
+
+def test_workflow_orders_dependencies():
+    workflow = Workflow("test")
+    workflow.add_node(WorkflowNode("b", "b", dependencies=["a"]))
+    workflow.add_node(WorkflowNode("a", "a"))
+    assert [node.name for node in workflow.topological_order()] == ["a", "b"]
+
+
+def test_launcher_bootstraps_and_runs():
+    launcher = JARVISLauncher(Settings(enabled_modules=[]))
+    result = launcher.run("hello jarvis")
+    assert "hello jarvis" in result
+    assert launcher.status()["tools"] == ["memory_lookup", "search"]
+
+
+def test_module_tools_are_registered():
+    launcher = JARVISLauncher(Settings(enabled_modules=["vqc"]))
+    assert "vqc_query_project" in launcher.status()["tools"]
