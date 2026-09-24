@@ -1,22 +1,32 @@
-from jarvis.app.launcher import JARVISLauncher
-from jarvis.config.settings import Settings
-from jarvis.core.workflow import Workflow, WorkflowNode
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
 
+[project]
+name = "jarvis-v5-quantum-orchestrator"
+version = "5.0.0.dev0"
+description = "Quantum-classical AI orchestration runtime"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24.0"]
 
-def test_workflow_orders_dependencies():
-    workflow = Workflow("test")
-    workflow.add_node(WorkflowNode("b", "b", dependencies=["a"]))
-    workflow.add_node(WorkflowNode("a", "a"))
-    assert [node.name for node in workflow.topological_order()] == ["a", "b"]
+[project.optional-dependencies]
+embeddings = ["sentence-transformers>=2.2", "torch>=2.0"]
+quantum = ["pennylane>=0.35"]
+qiskit = ["qiskit>=1.0", "qiskit-ibm-runtime>=0.20"]
+pytket = ["pytket>=1.20"]
+test = ["pytest>=7.0", "pytest-cov>=4.1"]
+dev = ["build>=1.2.0", "pytest>=7.0", "pytest-cov>=4.1"]
 
+[project.scripts]
+jarvis = "jarvis_launch:main"
 
-def test_launcher_bootstraps_and_runs():
-    launcher = JARVISLauncher(Settings(enabled_modules=[]))
-    result = launcher.run("hello jarvis")
-    assert "hello jarvis" in result
-    assert launcher.status()["tools"] == ["memory_lookup", "search"]
+[tool.setuptools]
+py-modules = ["jarvis_launch", "jarvis_v5", "jarvis_vqc_layer"]
 
+[tool.setuptools.packages.find]
+include = ["jarvis*"]
 
-def test_module_tools_are_registered():
-    launcher = JARVISLauncher(Settings(enabled_modules=["vqc"]))
-    assert "vqc_query_project" in launcher.status()["tools"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

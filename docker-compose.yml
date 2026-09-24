@@ -1,0 +1,10 @@
+services:
+  jarvis:
+    build: .
+    read_only: true
+    tmpfs: /tmp
+    environment:
+      JARVIS_DOMAIN: ${JARVIS_DOMAIN:-quantum_architect}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      QISKIT_IBM_TOKEN: ${QISKIT_IBM_TOKEN:-}
+    command: ["--status"]
